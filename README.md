@@ -21,9 +21,10 @@ Ein einfach zu integrierender Chatbot für Websites, der maschinelles Lernen ver
 
 1. **Repository klonen:**
 
-   ```sh
-   git clone https://github.com/dein-username/chatbot.git
-   cd chatbot
+```sh
+git clone https://github.com/dein-username/chatbot.git
+cd chatbot
+```
 
 2. **Virtuelle Umgebung erstellen und aktivieren:**
 
