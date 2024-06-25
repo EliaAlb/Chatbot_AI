@@ -53,9 +53,9 @@ cd chatbot
   python run.py
   ```
 
-##Nutzung
+## Nutzung
 
-###Admin-Bereich
+### Admin-Bereich
 
 1. Öffnen Sie den Admin-Bereich unter http://localhost:5000/admin.
 2. Laden Sie eine CSV-Datei hoch, die Fragen und Antworten enthält. Beispielstruktur der CSV-Datei:
@@ -68,7 +68,7 @@ cd chatbot
   ```
 3. Nach dem Hochladen wird das Modell automatisch mit den neuen Daten trainiert.
 
-###Einbindung auf Webseiten
+### Einbindung auf Webseiten
 
 Fügen Sie den folgenden HTML-Code zu der Webseite hinzu, um den Chatbot-Button anzuzeigen:
 
@@ -86,7 +86,7 @@ Fügen Sie den folgenden HTML-Code zu der Webseite hinzu, um den Chatbot-Button 
 
 Ersetzen Sie `URL_TO_YOUR_SERVER` durch die URL, auf der Ihr Flask-Server läuft.
    
-###Training des Modells
+### Training des Modells
 
 Um das Modell manuell neu zu trainieren, nutzen Sie den Admin-Bereich oder senden Sie eine POST-Anfrage an `/retrain`:
 
@@ -94,7 +94,7 @@ Um das Modell manuell neu zu trainieren, nutzen Sie den Admin-Bereich oder sende
 curl -X POST http://localhost:5000/retrain
 ```
 
-##Projektstruktur
+## Projektstruktur
 
 ```arduino
 chatbot/
@@ -118,7 +118,7 @@ chatbot/
 ├── README.md
 ```
 
-###Beitragende
+### Beitragende
 
 - Elia Albanese - Softwareengineer - EliaAlb
 
