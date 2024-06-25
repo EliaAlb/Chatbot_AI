@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../static/css/styles.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    </head>
+    <body>
+        <div id="chatbot-button" onclick="toggleChatbox()">
+            <lord-icon src="https://cdn.lordicon.com/tymgxsew.json" trigger="hover" colors="primary:#ffffff"
+                style="width:40px;height:40px;color:white;">
+            </lord-icon>
+        </div>
+        <div id="chatbox" class="hidden">
+            <header>
+                <div class="header-content">
+                    <div class="avatar-container">
+                        <img src="../static/images/Logo_BG.svg" width="25px" alt="avatar" class="avatar">
+                        <span class="online-dot"></span>
+                    </div>
+                    <h2>Crealo</h2>
+                    <button class="toggle-button" onclick="toggleChatbox()">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+            </header>
+            <div class="messages"></div>
+            <div class="input-area">
+                <textarea id="user-input" placeholder="Ihre Nachricht..." onkeypress="checkEnter(event)"></textarea>
+                <button onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                <button onclick="toggleFileUpload()">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+            </div>
+            <div id="file-upload" class="custum-file-upload hidden">
+                <label for="file">
+                    <div class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="" viewBox="0 0 24 24">
+                            <g stroke-width="0" id="SVGRepo_bgCarrier"></g>
+                            <g stroke-linejoin="round" stroke-linecap="round" id="SVGRepo_tracerCarrier"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path fill=""
+                                    d="M10 1C9.73478 1 9.48043 1.10536 9.29289 1.29289L3.29289 7.29289C3.10536 7.48043 3 7.73478 3 8V20C3 21.6569 4.34315 23 6 23H7C7.55228 23 8 22.5523 8 22C8 21.4477 7.55228 21 7 21H6C5.44772 21 5 20.5523 5 20V9H10C10.5523 9 11 8.55228 11 8V3H18C18.5523 3 19 3.44772 19 4V9C19 9.55228 19.4477 10 20 10C20.5523 10 21 9.55228 21 9V4C21 2.34315 19.6569 1 18 1H10ZM9 7H6.41421L9 4.41421V7ZM14 15.5C14 14.1193 15.1193 13 16.5 13C17.8807 13 19 14.1193 19 15.5V16V17H20C21.1046 17 22 17.8954 22 19C22 20.1046 21.1046 21 20 21H13C11.8954 21 11 20.1046 11 19C11 17.8954 11.8954 17 13 17H14V16V15.5ZM16.5 11C14.142 11 12.2076 12.8136 12.0156 15.122C10.2825 15.5606 9 17.1305 9 19C9 21.2091 10.7909 23 13 23H20C22.2091 23 24 21.2091 24 19C24 17.1305 22.7175 15.5606 20.9844 15.122C20.7924 12.8136 18.858 11 16.5 11Z"
+                                    clip-rule="evenodd" fill-rule="evenodd"></path>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="text">
+                        <span>Click to upload file</span>
+                    </div>
+                    <input type="file" id="file" onchange="uploadFile()">
+                </label>
+            </div>
+        </div>
+        
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+        <script>
+            function scrollToBottom() {
+                const messagesDiv = document.querySelector('#chatbox .messages');
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        
+            function uploadFile() {
+                const fileInput = document.getElementById('file');
+                const file = fileInput.files[0];
+                const messagesDiv = document.querySelector('#chatbox .messages');
+                const fileUpload = document.getElementById('file-upload');
+        
+                let fileTypeIcon;
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+        
+                if (fileExtension === 'pdf') {
+                    fileTypeIcon = '<i class="fas fa-file-pdf"></i>';
+                } else if (['png', 'jpg', 'jpeg'].includes(fileExtension)) {
+                    fileTypeIcon = '<i class="fas fa-image"></i>';
+                } else {
+                    fileTypeIcon = '<i class="fas fa-file"></i>';
+                }
+        
+                const timestamp = new Date().toLocaleTimeString();
+                messagesDiv.innerHTML += `<div class="user-message"><div class="message-content" title="${timestamp}">${fileTypeIcon} <a href="#" download="${file.name}">${file.name}</a></div></div>`;
+                fileInput.value = '';
+                scrollToBottom();
+        
+                fileUpload.classList.remove('visible');
+                fileUpload.classList.add('hidden');
+            }
+        
+            async function sendMessage() {
+                const userInput = document.getElementById('user-input');
+                const message = userInput.value;
+                if (message.trim() === '') return;
+        
+                const messagesDiv = document.querySelector('#chatbox .messages');
+                const timestamp = new Date().toLocaleTimeString();
+                messagesDiv.innerHTML += `<div class="user-message"><div class="message-content" title="${timestamp}">${message}</div></div>`;
+                userInput.value = '';
+                scrollToBottom();
+        
+                const response = await fetch('/chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+        
+                const data = await response.json();
+                const botTimestamp = new Date().toLocaleTimeString();
+                messagesDiv.innerHTML += `
+                    <div class="bot-message">
+                        <img src="../static/images/Logo_BG.svg" width="25px" alt="avatar" class="bot-avatar">
+                        <div class="message-content" title="${botTimestamp}">${data.response}</div>
+                    </div>`;
+                scrollToBottom();
+            }
+        
+            function toggleChatbox() {
+                const chatbox = document.getElementById('chatbox');
+                if (chatbox.classList.contains('hidden')) {
+                    chatbox.classList.remove('hidden');
+                    chatbox.classList.add('visible');
+                    displayWelcomeMessage();
+                } else {
+                    chatbox.classList.remove('visible');
+                    chatbox.classList.add('hidden');
+                }
+            }
+        
+            function displayWelcomeMessage() {
+                const messagesDiv = document.querySelector('#chatbox .messages');
+                const timestamp = new Date().toLocaleTimeString();
+                messagesDiv.innerHTML = `
+                    <div class="bot-message">
+                        <img src="../static/images/Logo_BG.svg" width="25px" alt="avatar" class="bot-avatar">
+                        <div class="message-content" title="${timestamp}">Willkommen! Bitte geben Sie Ihre E-Mail-Adresse ein, um fortzufahren.</div>
+                    </div>`;
+                messagesDiv.innerHTML += `
+                    <div class="email-input-card">
+                        <label for="email-input">Email</label>
+                        <div class="email-input-wrapper" style="width: 93%;">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email-input" placeholder="Ihre E-Mail-Adresse" onkeypress="checkEmailEnter(event)" />
+                            <span id="email-validity-icon"></span>
+                        </div>
+                    </div>`;
+                scrollToBottom();
+            }
+        
+            function checkEmailEnter(event) {
+                if (event.key === 'Enter') {
+                    const emailInput = document.getElementById('email-input');
+                    const email = emailInput.value;
+                    const emailValidityIcon = document.getElementById('email-validity-icon');
+                    if (validateEmail(email)) {
+                        emailValidityIcon.innerHTML = '<i class="fas fa-check" style="color: green;"></i>';
+                        const messagesDiv = document.querySelector('#chatbox .messages');
+                        const timestamp = new Date().toLocaleTimeString();
+                        messagesDiv.innerHTML += `
+                            <div class="bot-message">
+                                <img src="./images/Logo_BG.svg" width="25px" alt="avatar" class="bot-avatar">
+                                <div class="message-content" title="${timestamp}">Vielen Dank! Sie können jetzt Ihre Frage oder Ihr Anliegen eingeben.</div>
+                            </div>`;
+                        // Lassen Sie die E-Mail im Eingabefeld bleiben
+                        emailInput.disabled = true;
+                        emailInput.style.backgroundColor = "#f1f1f1";
+                        scrollToBottom();
+                    } else {
+                        emailValidityIcon.innerHTML = '<i class="fas fa-times" style="color: red;"></i>';
+                    }
+                }
+            }
+        
+            function validateEmail(email) {
+                const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([^<>()[\]\\.,;:\s@"]+\.[^<>()[\]\\.,;:\s@"]{2,}))$/;
+                return re.test(String(email).toLowerCase());
+            }
+        
+            function toggleFileUpload() {
+                const fileUpload = document.getElementById('file-upload');
+                if (fileUpload.classList.contains('hidden')) {
+                    fileUpload.classList.remove('hidden');
+                    fileUpload.classList.add('visible');
+                } else {
+                    fileUpload.classList.remove('visible');
+                    fileUpload.classList.add('hidden');
+                }
+            }
+        
+            function checkEnter(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            }
+        </script>
+    </body>
+</html>
